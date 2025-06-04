@@ -492,7 +492,6 @@
         "y": 24
       },
       "id": 26,
-      "maxDataPoints": 100,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -500,12 +499,12 @@
         "orientation": "horizontal",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["min"],
+          "calcs": ["last"],
           "fields": "",
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
+        "textMode": "name-value",
         "wideLayout": true
       },
       "pluginVersion": "12.0.1",
@@ -517,10 +516,11 @@
           "expr": "up{job=\"backend\"}",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{instance}}",
           "refId": "A"
         }
       ],
-      "title": "Flask Application Health",
+      "title": "Backend Nodes Health",
       "type": "stat"
     },
     {

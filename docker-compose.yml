@@ -2,11 +2,23 @@ version: "3.8"
 
 services:
   backend:
-    build: ./backend
+    image: muqsithbarru/loadbalance_backend:latest
     expose:
       - 5000
     networks:
       - app_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+      labels:
+        prometheus.enable: "true"
+        prometheus.port: "5000"
+        prometheus.path: "/metrics"
 
   nginx:
     image: nginx:latest
@@ -14,21 +26,27 @@ services:
       - "8080:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - backend
     networks:
       - app_net
-
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:latest
     command:
       - "-nginx.scrape-uri=http://nginx/nginx_status"
     ports:
       - "9113:9113"
-    depends_on:
-      - nginx
     networks:
       - app_net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -45,15 +63,39 @@ services:
       - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)"
     networks:
       - app_net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  prometheus:
-    image: prom/prometheus
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
     networks:
       - app_net
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    networks:
+      - app_net
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
 
   grafana:
     image: grafana/grafana
@@ -61,10 +103,16 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
-    depends_on:
-      - prometheus
     networks:
       - app_net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
 networks:
   app_net:
+    driver: overlay
+
+volumes:
+  prometheus_data:

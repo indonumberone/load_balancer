@@ -5,9 +5,14 @@ scrape_configs:
   - job_name: "backend"
     dns_sd_configs:
       - names:
-          - "backend"
+          - "tasks.backend" # "tasks." prefix is crucial for finding all replicas
         type: A
         port: 5000
+    relabel_configs:
+      - source_labels: ["__address__"]
+        target_label: "instance" # This ensures each instance has a unique label
+      - source_labels: ["__meta_dns_name"]
+        target_label: "service"
 
   - job_name: "nginx"
     static_configs:
