@@ -1,6 +1,6 @@
 # 🚀 Load Balancing & Monitoring System
 
-Repositori ini untuk melengkapi tugas projek akhir kami, berikut adalah konfigurasi untuk sistem load balancing dan monitoring yang scalable menggunakan Docker Swarm, Nginx,Prometheus, dan Grafana
+Repositori ini untuk melengkapi tugas projek akhir sistem terdistribusi kami, berikut adalah konfigurasi untuk sistem load balancing dan monitoring yang scalable menggunakan Docker Swarm, Nginx,Prometheus, dan Grafana
 
 ## 📋 Tech Stack
 
