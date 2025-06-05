@@ -115,6 +115,24 @@ Untuk membuat swarm baru, jalankan perintah berikut pada node yang akan menjadi 
 docker swarm init
 ```
 
+### Tambahkan rules firewall di master dan worker
+
+```sh
+sudo ufw allow 2377
+```
+
+```sh
+sudo ufw allow 22/tcp
+sudo ufw allow 2377/tcp
+sudo ufw allow 7946/tcp
+sudo ufw allow 7946/udp
+sudo ufw allow 4789/udp
+```
+
+```bash
+sudo ufw reload
+```
+
 ### Menambahkan Node ke Swarm
 
 Untuk menambahkan node worker ke swarm, jalankan perintah berikut pada node manager untuk mendapatkan token join:
